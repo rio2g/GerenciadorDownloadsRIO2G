@@ -1,0 +1,64 @@
+# Carrega o assembly necessário para Windows Forms
+Add-Type -AssemblyName System.Windows.Forms
+
+# Cria a janela do formulário
+$form = New-Object System.Windows.Forms.Form
+$form.Text = "Gerenciador de Downloads de Programas de Desenvolvimento"
+$form.Size = New-Object System.Drawing.Size(400, 400)
+$form.StartPosition = "CenterScreen"
+
+# Lista de programas para download com os comandos de instalação
+$programs = @(
+    @{ Name = "Visual Studio Code"; Command = "choco install vscode -y"; },
+    @{ Name = "Git"; Command = "choco install git -y"; },
+    @{ Name = "Docker Desktop"; Command = "choco install docker-desktop -y"; },
+    @{ Name = "Node.js"; Command = "choco install nodejs -y"; },
+    @{ Name = "Python"; Command = "choco install python -y"; },
+    @{ Name = "Eclipse"; Command = "choco install eclipse -y"; },
+    @{ Name = "IntelliJ IDEA"; Command = "choco install intellijidea-community -y"; },
+    @{ Name = "Postman"; Command = "choco install postman -y"; },
+    @{ Name = "Vim"; Command = "choco install vim -y"; },
+    @{ Name = "NetBeans"; Command = "choco install netbeans -y"; }
+)
+
+# Cria checkboxes para cada programa
+$checkboxes = @()
+for ($i = 0; $i -lt $programs.Count; $i++) {
+    $checkbox = New-Object System.Windows.Forms.CheckBox
+    $checkbox.Text = $programs[$i].Name
+    # Ajuste da posição do checkbox
+    $checkbox.Location = New-Object System.Drawing.Point(20, 20 + ($i * 25)) # 25 pixels de espaçamento
+    $checkboxes += $checkbox
+    $form.Controls.Add($checkbox)
+}
+
+# Cria um botão para baixar os programas selecionados
+$buttonDownload = New-Object System.Windows.Forms.Button
+$buttonDownload.Text = "Baixar Selecionados"
+$buttonDownload.Location = New-Object System.Drawing.Point(20, 250)
+$buttonDownload.Size = New-Object System.Drawing.Size(120, 30)
+$form.Controls.Add($buttonDownload)
+
+# Evento para o botão de download
+$buttonDownload.Add_Click({
+    foreach ($i in 0..($checkboxes.Length - 1)) {
+        if ($checkboxes[$i].Checked) {
+            $program = $programs[$i]
+            Write-Host "Instalando: $($program.Name)"
+            Start-Process "cmd.exe" -ArgumentList "/c $($program.Command)" -NoNewWindow -Wait
+        }
+    }
+    Write-Host "Todos os downloads foram iniciados."
+})
+
+# Cria um botão para fechar a aplicação
+$buttonClose = New-Object System.Windows.Forms.Button
+$buttonClose.Text = "Fechar"
+$buttonClose.Location = New-Object System.Drawing.Point(300, 320)
+$buttonClose.Size = New-Object System.Drawing.Size(75, 30)
+$buttonClose.Add_Click({ $form.Close() })
+$form.Controls.Add($buttonClose)
+
+# Exibe o formulário
+$form.Add_Shown({$form.Activate()})
+[void]$form.ShowDialog()
